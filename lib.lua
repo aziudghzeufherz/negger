@@ -1266,11 +1266,10 @@ do
 
         for Property, Value in ThemeData.Properties do
             if type(Value) == "string" then
-                if not Library.Theme[Value] then
-                    Object[Property] = Value
+                local ThemeColor = Library.Theme[Value]
+                if ThemeColor then
+                    Object[Property] = ThemeColor
                 end
-
-                Object[Property] = Library.Theme[Value]
             else
                 Object[Property] = Value()
             end
@@ -4476,14 +4475,14 @@ do
                     FontFace = Library.Font,
                     TextSize = Library.FontSize - 1,
                     Parent = Items["Stuff"].Instance,
-                    TextColor3 = Library.Theme["Dark Text"],
+                    TextColor3 = Library.Theme["Inactive Text"],
                     Text = "qlnt library",
                     Size = UDim2.new(1, 0, 0, 13),
                     BackgroundTransparency = 1,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     BorderSizePixel = 0,
                     LayoutOrder = 2
-                }):AddToTheme({ TextColor3 = 'Dark Text' })
+                }):AddToTheme({ TextColor3 = 'Inactive Text' })
 
                 Items["Healthbar"] = Library:Create("Frame", {
                     Name = "\0",
@@ -7080,7 +7079,7 @@ do
                         TextSize = Library.FontSize,
                         Parent = PlayerItems["NewPlayer"].Instance,
                         TextWrapped = true,
-                        TextColor3 = IsLocalPlayer and Library.Theme.Accent or Library.Theme.Text,
+                        TextColor3 = IsLocalPlayer and Library.Theme["Accent"] or Library.Theme["Text"],
                         Text = IsLocalPlayer and "LocalPlayer" or "Neutral",
                         Size = UDim2.new(0, 0, 0, 15),
                         AnchorPoint = Vector2.new(1, 0.5),
@@ -7113,10 +7112,10 @@ do
 
                     if Status == "Active" then
                         PlayerItems["Username"]:ChangeItemTheme({ TextColor3 = "Accent" })
-                        PlayerItems["Username"]:Tween({ TextColor3 = Library.Theme.Accent })
+                        PlayerItems["Username"]:Tween({ TextColor3 = Library.Theme["Accent"] })
                     else
                         PlayerItems["Username"]:ChangeItemTheme({ TextColor3 = "Text" })
-                        PlayerItems["Username"]:Tween({ TextColor3 = Library.Theme.Text })
+                        PlayerItems["Username"]:Tween({ TextColor3 = Library.Theme["Text"] })
                     end
                 end
 
@@ -7195,7 +7194,7 @@ do
                         local PlayerItems = Playerlist.Selected.Items
 
                         if PlayerItems then
-                            local NeutralColor = Library.Theme.Text
+                            local NeutralColor = Library.Theme["Text"]
                             local EnemyColor = Color3.fromRGB(255, 0, 0)
                             local FriendlyColor = Color3.fromRGB(0, 255, 0)
 
