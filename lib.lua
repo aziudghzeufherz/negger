@@ -4377,6 +4377,7 @@ do
 
             local LogoDecals = {}
             local LogoCamera = nil
+            local LogoCard = nil
 
             local function SetLogoTexture(Texture)
                 for _, Decal in LogoDecals do
@@ -4422,20 +4423,22 @@ do
                 LogoCamera = Instance.new("Camera")
                 LogoCamera.Parent = Viewport
                 Viewport.CurrentCamera = LogoCamera
+                LogoCamera.CFrame = CFrame.lookAt(Vector3.new(0, 0.3, 4.2), Vector3.zero)
                 Viewport.Ambient = Color3.fromRGB(255, 255, 255)
                 Viewport.LightColor = Color3.fromRGB(255, 255, 255)
                 Viewport.LightDirection = Vector3.new(-0.4, -0.75, -0.55)
 
                 local Card = Instance.new("Part")
                 Card.Name = "LogoCard"
-                Card.Size = Vector3.new(2.5, 2.5, 0.03)
+                Card.Size = Vector3.new(2.5, 2.5, 0.12)
                 Card.Anchored = true
                 Card.CanCollide = false
                 Card.CastShadow = false
                 Card.Transparency = 1
                 Card.Material = Enum.Material.SmoothPlastic
-                Card.CFrame = CFrame.Angles(math.rad(10), 0, 0)
+                Card.CFrame = CFrame.new(0, 0, 0)
                 Card.Parent = World
+                LogoCard = Card
 
                 table.clear(LogoDecals)
 
@@ -4612,14 +4615,13 @@ do
             end
 
             Library:Connect(RunService.RenderStepped, function()
-                if not LogoCamera or not LogoCamera.Parent then
-                    return
+                if LogoCard and LogoCard.Parent then
+                    LogoCard.CFrame = CFrame.Angles(0, tick() * 0.75, 0)
                 end
 
-                local Angle = tick() * 0.85
-                local Distance = 4.1
-                local CamPos = Vector3.new(math.sin(Angle) * Distance, 0.08, math.cos(Angle) * Distance)
-                LogoCamera.CFrame = CFrame.lookAt(CamPos, Vector3.zero)
+                if LogoCamera and LogoCamera.Parent then
+                    LogoCamera.CFrame = CFrame.lookAt(Vector3.new(0, 0.3, 4.2), Vector3.zero)
+                end
             end)
 
             function Indicator:SetVisibility(Bool)
