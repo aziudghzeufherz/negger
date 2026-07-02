@@ -4488,32 +4488,16 @@ do
                     LayoutOrder = 2
                 }):AddToTheme({ TextColor3 = 'Inactive Text' })
 
-                Items["LiveRow"] = Library:Create("Frame", {
-                    Name = "\0",
-                    Parent = Items["Stuff"].Instance,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 12),
-                    BorderSizePixel = 0,
-                    LayoutOrder = 3
-                })
-
-                Library:Create("UIListLayout", {
-                    Name = "\0",
-                    Parent = Items["LiveRow"].Instance,
-                    FillDirection = Enum.FillDirection.Horizontal,
-                    SortOrder = Enum.SortOrder.LayoutOrder,
-                    Padding = UDim.new(0, 5),
-                    VerticalAlignment = Enum.VerticalAlignment.Center
-                })
-
                 Items["LiveGlow"] = Library:Create("Frame", {
                     Name = "\0",
-                    Parent = Items["LiveRow"].Instance,
+                    Parent = Items["TargetIndicator"].Instance,
+                    AnchorPoint = Vector2.new(1, 1),
+                    Position = UDim2.new(1, -8, 1, -8),
                     Size = UDim2.new(0, 10, 0, 10),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Accent"],
                     BackgroundTransparency = 0.55,
-                    LayoutOrder = 1
+                    ZIndex = 4
                 })
 
                 Library:Create("UICorner", {
@@ -4530,7 +4514,7 @@ do
                     Size = UDim2.new(0, 6, 0, 6),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Accent"],
-                    ZIndex = 2
+                    ZIndex = 5
                 }):AddToTheme({ BackgroundColor3 = 'Accent' })
 
                 Library:Create("UICorner", {
@@ -4549,29 +4533,12 @@ do
                         ColorSequenceKeypoint.new(1, Color3.fromRGB(90, 130, 220)),
                     }
                 })
-
-                Items["LiveText"] = Library:Create("TextLabel", {
-                    Name = "\0",
-                    FontFace = Library.Font,
-                    TextSize = Library.FontSize - 1,
-                    Parent = Items["LiveRow"].Instance,
-                    TextColor3 = Library.Theme["Inactive Text"],
-                    Text = "channel live",
-                    TextWrapped = false,
-                    Size = UDim2.new(0, 0, 0, 12),
-                    AutomaticSize = Enum.AutomaticSize.X,
-                    BackgroundTransparency = 1,
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    BorderSizePixel = 0,
-                    LayoutOrder = 2
-                }):AddToTheme({ TextColor3 = 'Inactive Text' })
             end
 
             local function RefreshBranding()
                 Items["Avatar"].Instance.Image = LogoAsset
                 Items["Name"].Instance.Text = "Artefact"
-                Items["Subtitle"].Instance.Text = "qlnt library"
-                Items["LiveText"].Instance.Text = "channel live"
+                Items["Subtitle"].Instance.Text = "made by @qlnt"
             end
 
             function Indicator:SetVisibility(Bool)
