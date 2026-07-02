@@ -4377,6 +4377,7 @@ do
 
             local LogoDecals = {}
             local LogoPart = nil
+            local LogoCamera = nil
 
             local function SetLogoTexture(Texture)
                 for _, Decal in LogoDecals do
@@ -4415,8 +4416,12 @@ do
             end
 
             local function SetupLogoViewport(Viewport)
-                local LogoCamera = Instance.new("Camera")
-                LogoCamera.CFrame = CFrame.new(0, 0, 3.4)
+                local WorldModel = Instance.new("WorldModel")
+                WorldModel.Name = "LogoWorld"
+                WorldModel.Parent = Viewport
+
+                LogoCamera = Instance.new("Camera")
+                LogoCamera.CFrame = CFrame.lookAt(Vector3.new(0, 0, 3.6), Vector3.zero)
                 LogoCamera.Parent = Viewport
                 Viewport.CurrentCamera = LogoCamera
                 Viewport.Ambient = Color3.fromRGB(255, 255, 255)
@@ -4425,18 +4430,23 @@ do
 
                 LogoPart = Instance.new("Part")
                 LogoPart.Name = "LogoPart"
-                LogoPart.Size = Vector3.new(2.2, 2.2, 0.06)
+                LogoPart.Size = Vector3.new(2.2, 2.2, 0.12)
                 LogoPart.Anchored = true
                 LogoPart.CanCollide = false
                 LogoPart.CastShadow = false
-                LogoPart.Material = Enum.Material.SmoothPlastic
+                LogoPart.Material = Enum.Material.Neon
                 LogoPart.Color = Color3.fromRGB(255, 255, 255)
                 LogoPart.Transparency = 1
-                LogoPart.Parent = Viewport
+                LogoPart.Parent = WorldModel
 
                 table.clear(LogoDecals)
 
-                for _, Face in { Enum.NormalId.Front, Enum.NormalId.Back } do
+                for _, Face in {
+                    Enum.NormalId.Front,
+                    Enum.NormalId.Back,
+                    Enum.NormalId.Top,
+                    Enum.NormalId.Bottom,
+                } do
                     local Decal = Instance.new("Decal")
                     Decal.Name = "LogoDecal"
                     Decal.Face = Face
@@ -4610,13 +4620,21 @@ do
                 Items["Subtitle"].Instance.Text = "by @qlnt"
             end
 
-            Library:Connect(game:GetService("RunService").Heartbeat, function()
-                if not LogoPart or not LogoPart.Parent then
+            Library:Connect(RunService.RenderStepped, function()
+                if not LogoPart or not LogoPart.Parent or not LogoCamera or not LogoCamera.Parent then
                     return
                 end
 
-                local Time = tick() * 1.15
-                LogoPart.CFrame = CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(14), Time, 0)
+                local Time = tick()
+                local Spin = Time * 2.4
+                LogoPart.CFrame = CFrame.Angles(math.rad(22), Spin, math.rad(8))
+
+                local Orbit = Time * 1.35
+                local Distance = 3.6
+                LogoCamera.CFrame = CFrame.lookAt(
+                    Vector3.new(math.sin(Orbit) * Distance, 0.18, math.cos(Orbit) * Distance),
+                    Vector3.zero
+                )
             end)
 
             function Indicator:SetVisibility(Bool)
