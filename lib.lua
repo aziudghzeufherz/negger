@@ -4376,7 +4376,6 @@ do
             local LogoTint = Color3.fromRGB(255, 255, 255)
 
             local LogoDecals = {}
-            local LogoPart = nil
             local LogoCamera = nil
 
             local function SetLogoTexture(Texture)
@@ -4410,50 +4409,42 @@ do
                         end
                     end
 
-                    local ThumbUri = "rbxthumb://type=Asset&id=" .. LogoId .. "&w=150&h=150"
+                    local ThumbUri = "rbxthumb://type=Asset&id=" .. LogoId .. "&w=256&h=256"
                     SetLogoTexture(ThumbUri)
                 end)
             end
 
-            local function SetupLogoViewport(Viewport)
-                local WorldModel = Instance.new("WorldModel")
-                WorldModel.Name = "LogoWorld"
-                WorldModel.Parent = Viewport
+            local function SetupLogoScene(Viewport)
+                local World = Instance.new("WorldModel")
+                World.Name = "LogoWorld"
+                World.Parent = Viewport
 
                 LogoCamera = Instance.new("Camera")
-                LogoCamera.CFrame = CFrame.lookAt(Vector3.new(0, 0, 3.6), Vector3.zero)
                 LogoCamera.Parent = Viewport
                 Viewport.CurrentCamera = LogoCamera
                 Viewport.Ambient = Color3.fromRGB(255, 255, 255)
                 Viewport.LightColor = Color3.fromRGB(255, 255, 255)
-                Viewport.LightDirection = Vector3.new(-0.35, -0.65, -0.85)
+                Viewport.LightDirection = Vector3.new(-0.4, -0.75, -0.55)
 
-                LogoPart = Instance.new("Part")
-                LogoPart.Name = "LogoPart"
-                LogoPart.Size = Vector3.new(2.2, 2.2, 0.12)
-                LogoPart.Anchored = true
-                LogoPart.CanCollide = false
-                LogoPart.CastShadow = false
-                LogoPart.Material = Enum.Material.Neon
-                LogoPart.Color = Color3.fromRGB(255, 255, 255)
-                LogoPart.Transparency = 1
-                LogoPart.Parent = WorldModel
+                local Card = Instance.new("Part")
+                Card.Name = "LogoCard"
+                Card.Size = Vector3.new(2.5, 2.5, 0.03)
+                Card.Anchored = true
+                Card.CanCollide = false
+                Card.CastShadow = false
+                Card.Transparency = 1
+                Card.Material = Enum.Material.SmoothPlastic
+                Card.CFrame = CFrame.Angles(math.rad(10), 0, 0)
+                Card.Parent = World
 
                 table.clear(LogoDecals)
 
-                for _, Face in {
-                    Enum.NormalId.Front,
-                    Enum.NormalId.Back,
-                    Enum.NormalId.Top,
-                    Enum.NormalId.Bottom,
-                } do
+                for _, Face in { Enum.NormalId.Front, Enum.NormalId.Back } do
                     local Decal = Instance.new("Decal")
-                    Decal.Name = "LogoDecal"
                     Decal.Face = Face
-                    Decal.Transparency = 0
                     Decal.Color3 = LogoTint
                     Decal.Texture = "rbxassetid://" .. LogoId
-                    Decal.Parent = LogoPart
+                    Decal.Parent = Card
                     table.insert(LogoDecals, Decal)
                 end
             end
@@ -4501,7 +4492,7 @@ do
                     Parent = Items["TargetIndicator"].Instance,
                     BackgroundTransparency = 1,
                     Position = UDim2.new(0, 10, 0, 10),
-                    Size = UDim2.new(0, 56, 0, 56),
+                    Size = UDim2.new(0, 54, 0, 54),
                     BorderSizePixel = 0,
                     ClipsDescendants = true,
                     ZIndex = 2
@@ -4516,7 +4507,7 @@ do
                     ZIndex = 2
                 })
 
-                SetupLogoViewport(Items["LogoViewport"].Instance)
+                SetupLogoScene(Items["LogoViewport"].Instance)
 
                 Items["Stuff"] = Library:Create("Frame", {
                     Name = "\0",
@@ -4621,20 +4612,14 @@ do
             end
 
             Library:Connect(RunService.RenderStepped, function()
-                if not LogoPart or not LogoPart.Parent or not LogoCamera or not LogoCamera.Parent then
+                if not LogoCamera or not LogoCamera.Parent then
                     return
                 end
 
-                local Time = tick()
-                local Spin = Time * 2.4
-                LogoPart.CFrame = CFrame.Angles(math.rad(22), Spin, math.rad(8))
-
-                local Orbit = Time * 1.35
-                local Distance = 3.6
-                LogoCamera.CFrame = CFrame.lookAt(
-                    Vector3.new(math.sin(Orbit) * Distance, 0.18, math.cos(Orbit) * Distance),
-                    Vector3.zero
-                )
+                local Angle = tick() * 0.85
+                local Distance = 4.1
+                local CamPos = Vector3.new(math.sin(Angle) * Distance, 0.08, math.cos(Angle) * Distance)
+                LogoCamera.CFrame = CFrame.lookAt(CamPos, Vector3.zero)
             end)
 
             function Indicator:SetVisibility(Bool)
