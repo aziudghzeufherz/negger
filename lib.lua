@@ -7124,15 +7124,16 @@ do
                         FontFace = Library.Font,
                         TextSize = Library.FontSize,
                         Parent = PlayerItems["NewPlayer"].Instance,
-                        TextWrapped = true,
+                        TextWrapped = false,
+                        TextTruncate = Enum.TextTruncate.AtEnd,
+                        TextXAlignment = Enum.TextXAlignment.Left,
                         TextColor3 = Library.Theme["Text"],
-                        Text = PlayerDisplay .. " (" .. PlayerName .. ")",
-                        Size = UDim2.new(0, 0, 0, 15),
+                        Text = PlayerDisplay,
+                        Size = UDim2.new(0.38, -6, 0, 15),
                         AnchorPoint = Vector2.new(0, 0.5),
                         BorderSizePixel = 0,
                         BackgroundTransparency = 1,
                         Position = UDim2.new(0, 0, 0.5, 0),
-                        AutomaticSize = Enum.AutomaticSize.X
                     }):AddToTheme({ TextColor3 = 'Text' })
 
                     PlayerItems["UserID"] = Library:Create("TextLabel", {
