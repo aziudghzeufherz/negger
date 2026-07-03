@@ -4371,48 +4371,8 @@ do
 
         Library.TargetIndicator = function(Self)
             local Indicator = {}
-            local LogoId = "99061651310213"
-            local LogoUrl = "https://api.qlnt.me/assets/logo_white.png"
-            local LogoTint = Color3.fromRGB(255, 255, 255)
-
-            local LogoSpinTime = 0
-
-            local function ApplyLogo(ImageLabel)
-                if not ImageLabel then
-                    return
-                end
-
-                ImageLabel.ImageTransparency = 0
-                ImageLabel.BackgroundTransparency = 1
-                ImageLabel.ScaleType = Enum.ScaleType.Fit
-                ImageLabel.ImageColor3 = LogoTint
-                ImageLabel.Image = "rbxassetid://" .. LogoId
-
-                task.spawn(function()
-                    local ToAsset = getcustomasset or getsynasset
-                    if writefile and ToAsset then
-                        local Ok, Data = pcall(function()
-                            return game:HttpGet(LogoUrl)
-                        end)
-                        if Ok and type(Data) == "string" and #Data > 64 then
-                            if isfolder and makefolder and not isfolder("Artefact") then
-                                pcall(makefolder, "Artefact")
-                            end
-                            local Path = "Artefact/logo.png"
-                            local Wrote = pcall(writefile, Path, Data)
-                            if Wrote then
-                                local AssetOk, AssetUri = pcall(ToAsset, Path)
-                                if AssetOk and type(AssetUri) == "string" and AssetUri ~= "" then
-                                    ImageLabel.Image = AssetUri
-                                    return
-                                end
-                            end
-                        end
-                    end
-
-                    ImageLabel.Image = "rbxthumb://type=Asset&id=" .. LogoId .. "&w=256&h=256"
-                end)
-            end
+            local ScanTime = 0
+            local StatusTick = 0
 
             local Items = {}
             do
@@ -4452,49 +4412,50 @@ do
                     BackgroundColor3 = Library.Theme["Accent"]
                 }):AddToTheme({ BackgroundColor3 = 'Accent' })
 
-                Items["Avatar"] = Library:Create("Frame", {
+                Items["Badge"] = Library:Create("Frame", {
                     Name = "\0",
                     Parent = Items["TargetIndicator"].Instance,
-                    BackgroundTransparency = 1,
                     Position = UDim2.new(0, 10, 0, 10),
                     Size = UDim2.new(0, 54, 0, 54),
                     BorderSizePixel = 0,
-                    ClipsDescendants = false,
+                    BackgroundColor3 = Library.Theme["Section"],
                     ZIndex = 2
-                })
+                }):AddToTheme({ BackgroundColor3 = 'Section' })
 
-                Items["LogoGlow"] = Library:Create("Frame", {
+                Library:Create("UIStroke", {
                     Name = "\0",
-                    Parent = Items["Avatar"].Instance,
-                    AnchorPoint = Vector2.new(0.5, 0.5),
-                    Position = UDim2.new(0.5, 0, 0.5, 0),
-                    Size = UDim2.new(0, 46, 0, 46),
+                    Parent = Items["Badge"].Instance,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    Color = Library.Theme["Accent"],
+                    Transparency = 0.35
+                }):AddToTheme({ Color = 'Accent' })
+
+                Items["BadgeLetter"] = Library:Create("TextLabel", {
+                    Name = "\0",
+                    FontFace = Library.Font,
+                    TextSize = Library.FontSize + 8,
+                    Parent = Items["Badge"].Instance,
+                    TextColor3 = Library.Theme["Accent"],
+                    Text = "A",
+                    Size = UDim2.new(1, 0, 1, -4),
+                    BackgroundTransparency = 1,
+                    TextXAlignment = Enum.TextXAlignment.Center,
+                    TextYAlignment = Enum.TextYAlignment.Center,
+                    BorderSizePixel = 0,
+                    ZIndex = 3
+                }):AddToTheme({ TextColor3 = 'Accent' })
+
+                Items["BadgeLine"] = Library:Create("Frame", {
+                    Name = "\0",
+                    Parent = Items["Badge"].Instance,
+                    AnchorPoint = Vector2.new(0.5, 1),
+                    Position = UDim2.new(0.5, 0, 1, 0),
+                    Size = UDim2.new(1, -10, 0, 1),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Accent"],
-                    BackgroundTransparency = 0.82,
-                    ZIndex = 2
-                }):AddToTheme({ BackgroundColor3 = 'Accent' })
-
-                Library:Create("UICorner", {
-                    Name = "\0",
-                    Parent = Items["LogoGlow"].Instance,
-                    CornerRadius = UDim.new(1, 0)
-                })
-
-                Items["LogoImage"] = Library:Create("ImageLabel", {
-                    Name = "\0",
-                    Parent = Items["Avatar"].Instance,
-                    AnchorPoint = Vector2.new(0.5, 0.5),
-                    Position = UDim2.new(0.5, 0, 0.5, 0),
-                    Size = UDim2.new(0, 40, 0, 40),
-                    BackgroundTransparency = 1,
-                    BorderSizePixel = 0,
-                    ScaleType = Enum.ScaleType.Fit,
-                    ImageColor3 = LogoTint,
                     ZIndex = 3
-                })
-
-                ApplyLogo(Items["LogoImage"].Instance)
+                }):AddToTheme({ BackgroundColor3 = 'Accent' })
 
                 Items["Stuff"] = Library:Create("Frame", {
                     Name = "\0",
@@ -4545,6 +4506,54 @@ do
                     LayoutOrder = 2
                 }):AddToTheme({ TextColor3 = 'Inactive Text' })
 
+                Items["StatusLine"] = Library:Create("TextLabel", {
+                    Name = "\0",
+                    FontFace = Library.Font,
+                    TextSize = Library.FontSize - 1,
+                    Parent = Items["Stuff"].Instance,
+                    TextColor3 = Library.Theme["Inactive Text"],
+                    Text = "active",
+                    Size = UDim2.new(1, 0, 0, 12),
+                    BackgroundTransparency = 1,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    BorderSizePixel = 0,
+                    LayoutOrder = 3
+                }):AddToTheme({ TextColor3 = 'Inactive Text' })
+
+                Items["ScanTrack"] = Library:Create("Frame", {
+                    Name = "\0",
+                    Parent = Items["TargetIndicator"].Instance,
+                    AnchorPoint = Vector2.new(0, 1),
+                    Position = UDim2.new(0, 10, 1, -8),
+                    Size = UDim2.new(1, -20, 0, 2),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = Library.Theme["Outline"],
+                    BackgroundTransparency = 0.35,
+                    ClipsDescendants = true,
+                    ZIndex = 2
+                }):AddToTheme({ BackgroundColor3 = 'Outline' })
+
+                Items["ScanBar"] = Library:Create("Frame", {
+                    Name = "\0",
+                    Parent = Items["ScanTrack"].Instance,
+                    Position = UDim2.new(0, -28, 0, 0),
+                    Size = UDim2.new(0, 28, 1, 0),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = Library.Theme["Accent"],
+                    ZIndex = 3
+                }):AddToTheme({ BackgroundColor3 = 'Accent' })
+
+                Library:Create("UIGradient", {
+                    Name = "\0",
+                    Parent = Items["ScanBar"].Instance,
+                    Transparency = NumberSequence.new {
+                        NumberSequenceKeypoint.new(0, 1),
+                        NumberSequenceKeypoint.new(0.35, 0),
+                        NumberSequenceKeypoint.new(0.65, 0),
+                        NumberSequenceKeypoint.new(1, 1),
+                    }
+                })
+
                 Items["LiveGlow"] = Library:Create("Frame", {
                     Name = "\0",
                     Parent = Items["TargetIndicator"].Instance,
@@ -4593,9 +4602,9 @@ do
             end
 
             local function RefreshBranding()
-                ApplyLogo(Items["LogoImage"].Instance)
                 Items["Name"].Instance.Text = "Artefact"
                 Items["Subtitle"].Instance.Text = "by @qlnt"
+                Items["StatusLine"].Instance.Text = "active"
             end
 
             Library:Connect(RunService.RenderStepped, function(DeltaTime)
@@ -4603,16 +4612,21 @@ do
                     return
                 end
 
-                LogoSpinTime += DeltaTime
-                local Pulse = (math.sin(LogoSpinTime * 2.4) + 1) / 2
-                local Scale = 38 + (Pulse * 4)
-                local GlowScale = Scale + 8
-                local Tilt = math.sin(LogoSpinTime * 0.9) * 5
+                ScanTime += DeltaTime
+                StatusTick += DeltaTime
 
-                Items["LogoImage"].Instance.Size = UDim2.fromOffset(Scale, Scale)
-                Items["LogoImage"].Instance.Rotation = Tilt
-                Items["LogoGlow"].Instance.Size = UDim2.fromOffset(GlowScale, GlowScale)
-                Items["LogoGlow"].Instance.BackgroundTransparency = 0.78 + (Pulse * 0.14)
+                local TrackWidth = Items["ScanTrack"].Instance.AbsoluteSize.X
+                local BarWidth = Items["ScanBar"].Instance.AbsoluteSize.X
+                local Travel = math.max(TrackWidth + BarWidth, 1)
+                local Progress = (ScanTime % 2.2) / 2.2
+
+                Items["ScanBar"].Instance.Position = UDim2.new(0, math.floor((Travel * Progress) - BarWidth), 0, 0)
+
+                if StatusTick >= 0.5 then
+                    StatusTick = 0
+                    local Fps = math.floor(1 / math.max(DeltaTime, 0.001))
+                    Items["StatusLine"].Instance.Text = string.format("active · %dfps", Fps)
+                end
             end)
 
             function Indicator:SetVisibility(Bool)
