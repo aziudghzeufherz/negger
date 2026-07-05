@@ -6128,7 +6128,11 @@ do
                 end
 
                 if not Response.Body or Response.Body == "" then
-                    return true
+                    local method = string.upper(tostring(Method or "GET"))
+                    if method == "POST" or method == "PUT" or method == "DELETE" or method == "PATCH" then
+                        return true
+                    end
+                    return nil
                 end
 
                 local DecodedSuccess, Body = pcall(HttpService.JSONDecode, HttpService, Response.Body)
@@ -6161,12 +6165,12 @@ do
 
             local function ValidateToken()
                 local Data = MakeRequest("me")
-                return Data and Data.display_name
+                return type(Data) == "table" and Data.display_name
             end
 
             local function GetCurrentTrack()
                 local Data = MakeRequest("me/player")
-                if not Data or not Data.item then
+                if type(Data) ~= "table" or type(Data.item) ~= "table" then
                     return nil
                 end
 
@@ -6200,7 +6204,7 @@ do
                 local Data = MakeRequest("me/player/queue")
                 local Results = {}
 
-                if not Data or type(Data.queue) ~= "table" then
+                if type(Data) ~= "table" or type(Data.queue) ~= "table" then
                     return Results
                 end
 
@@ -6224,7 +6228,7 @@ do
                 local Data = MakeRequest("search?type=track&limit=8&q=" .. HttpService:UrlEncode(Query))
                 local Results = {}
 
-                if not Data or not Data.tracks or not Data.tracks.items then
+                if type(Data) ~= "table" or type(Data.tracks) ~= "table" or type(Data.tracks.items) ~= "table" then
                     return Results
                 end
 
@@ -7241,7 +7245,8 @@ do
                     Position = UDim2.new(0.5, 0, 0.5, 0),
                     Size = UDim2.new(0, 552, 0, 451),
                     BorderSizePixel = 0,
-                    BackgroundColor3 = Library.Theme["Background"]
+                    BackgroundColor3 = Library.Theme["Background"],
+                    ZIndex = 2,
                 }):AddToTheme({ BackgroundColor3 = 'Background' })
 
                 Items["MainFrame"]:MakeDraggable()
@@ -8811,7 +8816,8 @@ do
                     Parent = Items["RealSlider"].Instance,
                     Size = UDim2.new(1, 0, 1, 0),
                     BorderSizePixel = 0,
-                    BackgroundColor3 = Library.Theme["Accent"]
+                    BackgroundColor3 = Library.Theme["Accent"],
+                    Active = false,
                 }):AddToTheme({ BackgroundColor3 = 'Accent' })
 
                 Library:Create("UIGradient", {
@@ -8836,7 +8842,8 @@ do
                     BackgroundTransparency = 1,
                     Position = UDim2.new(1, 0, 0, 0),
                     BorderSizePixel = 0,
-                    AutomaticSize = Enum.AutomaticSize.X
+                    AutomaticSize = Enum.AutomaticSize.X,
+                    Active = false,
                 }):AddToTheme({ TextColor3 = 'Text' })
 
                 Library:Create("UIStroke", {
@@ -8871,11 +8878,16 @@ do
             end
 
             function Slider:GetSize(Input)
-                local SizeX = (Input.Position.X - Items["RealSlider"].Instance.AbsolutePosition.X) /
-                    Items["RealSlider"].Instance.AbsoluteSize.X
-                local Value = ((Slider.Max - Slider.Min) * SizeX) + Slider.Min
+                local absPos = Items["RealSlider"].Instance.AbsolutePosition
+                local absSize = Items["RealSlider"].Instance.AbsoluteSize
+                if absSize.X <= 0 then
+                    return Slider.Value
+                end
 
-                return Value
+                local mouse = UserInputService:GetMouseLocation()
+                local posX = (Input and Input.Position and Input.Position.X) or mouse.X
+                local SizeX = math.clamp((posX - absPos.X) / absSize.X, 0, 1)
+                return ((Slider.Max - Slider.Min) * SizeX) + Slider.Min
             end
 
             function Slider:SetText(Text)
@@ -8904,6 +8916,16 @@ do
                             InputChanged = nil
                         end
                     end)
+                end
+            end)
+
+            Library:Connect(UserInputService.InputEnded, function(Input)
+                if Slider.Sliding and (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) then
+                    Slider.Sliding = false
+                    if InputChanged then
+                        InputChanged:Disconnect()
+                        InputChanged = nil
+                    end
                 end
             end)
 
@@ -9381,7 +9403,7 @@ do
                 end
             end)
 
-            for Index, Value in Dropdown.OptionItems do
+            for _, Value in ipairs(Dropdown.OptionItems) do
                 Dropdown:Add(Value)
             end
 
@@ -9967,7 +9989,7 @@ do
                 end
             end)
 
-            for Index, Value in Dropdown.OptionItems do
+            for _, Value in ipairs(Dropdown.OptionItems) do
                 Dropdown:Add(Value)
             end
 
