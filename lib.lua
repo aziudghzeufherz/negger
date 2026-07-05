@@ -1077,7 +1077,19 @@ do
     end
 
     Library.Round = function(Self, Number, Float)
-        local Multiplier = 1 / (Float or 1)
+        Number = tonumber(Number)
+        if Number == nil or Number ~= Number then
+            Number = 0
+        end
+
+        local Step = tonumber(Float)
+        if Step == nil or Step == 0 then
+            Step = 1
+        elseif Step >= 1 and Step == math.floor(Step) then
+            Step = 10 ^ (-Step)
+        end
+
+        local Multiplier = 1 / Step
         return math.floor(Number * Multiplier) / Multiplier
     end
 
@@ -8782,10 +8794,18 @@ do
                 Max = Min + 1
             end
 
+            local Default = tonumber(Params.Default)
+            if Default == nil then
+                Default = tonumber(Params.default)
+            end
+            if Default == nil then
+                Default = Min
+            end
+
             local Slider = {
                 Name = Params.Name or Params.name or "Slider",
                 Flag = Params.Flag or Params.flag or (Params.Name or Params.name),
-                Default = Params.Default or Params.default or Min,
+                Default = Default,
                 Min = Min,
                 Max = Max,
                 Tooltip = Params.Tooltip or Params.tooltip or nil,
@@ -8930,7 +8950,7 @@ do
             end
 
             local function GetPointerX(Input)
-                if Input and Input.UserInputType == Enum.UserInputType.Touch and Input.Position then
+                if Input and Input.Position then
                     return Input.Position.X
                 end
 
@@ -8950,7 +8970,11 @@ do
                     return 0
                 end
 
-                local PointerX = GetPointerX(Input)
+                local PointerX = tonumber(GetPointerX(Input))
+                if not PointerX then
+                    return 0
+                end
+
                 return math.clamp((PointerX - TrackX) / TrackW, 0, 1)
             end
 
@@ -8960,7 +8984,12 @@ do
 
             function Slider:Set(Value, Instant)
                 local Range = Slider.Max - Slider.Min
-                Slider.Value = Library:Round(math.clamp(tonumber(Value) or Slider.Value, Slider.Min, Slider.Max), Slider.Decimals)
+                local Number = tonumber(Value)
+                if Number == nil or Number ~= Number then
+                    Number = Slider.Value
+                end
+
+                Slider.Value = Library:Round(math.clamp(Number, Slider.Min, Slider.Max), Slider.Decimals)
 
                 local Alpha = Range > 0 and (Slider.Value - Slider.Min) / Range or 0
                 local TargetSize = UDim2.new(Alpha, 0, 1, 0)
