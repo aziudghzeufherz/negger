@@ -7278,7 +7278,6 @@ do
                     Size = UDim2.new(0, 552, 0, 451),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Background"],
-                    ZIndex = 2,
                 }):AddToTheme({ BackgroundColor3 = 'Background' })
 
                 Items["MainFrame"]:MakeDraggable()
@@ -7940,21 +7939,19 @@ do
                 Page.Active = Bool
 
                 if Bool then
+                    Items["Page"].Instance.Parent = Page.Window.Items["Content"].Instance
+                    Items["Page"].Instance.Visible = true
                     Items["Text"]:ChangeItemTheme({ TextColor3 = "Accent" })
                     Items["Text"]:Tween({ TextColor3 = Library.Theme.Accent })
                 else
+                    Items["Page"].Instance.Visible = false
+                    Items["Page"].Instance.Parent = Library.UnusedHolder.Instance
                     Items["Text"]:ChangeItemTheme({ TextColor3 = "Text" })
                     Items["Text"]:Tween({ TextColor3 = Library.Theme.Text })
                 end
 
                 Items["Page"]:FadeDescendants(Bool, function()
                     Debounce = false
-
-                    if Bool then
-                        Items["Page"].Instance.Parent = Page.Window.Items["Content"].Instance
-                    else
-                        Items["Page"].Instance.Parent = Library.UnusedHolder.Instance
-                    end
                 end)
             end
 
@@ -8094,21 +8091,19 @@ do
                 Debounce = true
 
                 if Bool then
+                    Items["Page"].Instance.Parent = Page.Page.Items["Columns"].Instance
+                    Items["Page"].Instance.Visible = true
                     Items["Inactive"]:ChangeItemTheme({ TextColor3 = "Accent" })
                     Items["Inactive"]:Tween({ TextColor3 = Library.Theme.Accent })
                 else
+                    Items["Page"].Instance.Visible = false
+                    Items["Page"].Instance.Parent = Library.UnusedHolder.Instance
                     Items["Inactive"]:ChangeItemTheme({ TextColor3 = "Text" })
                     Items["Inactive"]:Tween({ TextColor3 = Library.Theme.Text })
                 end
 
                 Items["Page"]:FadeDescendants(Bool, function()
                     Debounce = false
-
-                    if Bool then
-                        Items["Page"].Instance.Parent = Page.Page.Items["Columns"].Instance
-                    else
-                        Items["Page"].Instance.Parent = Library.UnusedHolder.Instance
-                    end
                 end)
             end
 
