@@ -747,8 +747,8 @@ do
         end
 
         local Object = Self.Instance
-
-        local MousePosition = Vector2.new(Mouse.X, Mouse.Y)
+        -- Holder uses IgnoreGuiInset; Mouse.Y is viewport-relative — align with AbsolutePosition
+        local MousePosition = Vector2.new(Mouse.X, Mouse.Y + GuiInset)
 
         return MousePosition.X >= Object.AbsolutePosition.X and
             MousePosition.X <= Object.AbsolutePosition.X + Object.AbsoluteSize.X
@@ -9550,6 +9550,9 @@ do
                 Debounce = true
 
                 if Dropdown.IsOpen then
+                    Dropdown._openGen = (Dropdown._openGen or 0) + 1
+                    Dropdown._suppressClose = true
+
                     Items["Icon"]:Tween({ Rotation = -90 })
                     Dropdown:UpdateListSize()
                     OptionHolder.Position = UDim2.new(0, RealDropdown.AbsolutePosition.X, 0,
@@ -9578,7 +9581,18 @@ do
                     OptionHolder.ZIndex = 3
 
                     Debounce = false
-                    Dropdown.CanUpdateNow = true
+                    -- Delay clip/position sync so the open click doesn't instantly close the list
+                    local openGen = Dropdown._openGen
+                    task.defer(function()
+                        if Dropdown.IsOpen and Dropdown._openGen == openGen then
+                            Dropdown.CanUpdateNow = true
+                        end
+                    end)
+                    task.delay(0.12, function()
+                        if Dropdown._openGen == openGen then
+                            Dropdown._suppressClose = false
+                        end
+                    end)
 
                     for Index, Value in Library.OpenFrames do
                         if Value ~= Dropdown and not Params.Parent and not Dropdown.Section.IsSettings then
@@ -9626,13 +9640,26 @@ do
 
             Library:Connect(UserInputService.InputBegan, function(Input)
                 if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-                    if Dropdown.IsOpen then
+                    if not Dropdown.IsOpen then
+                        return
+                    end
+                    -- Defer: same click that opens must not instantly close
+                    local openGen = Dropdown._openGen
+                    task.defer(function()
+                        if not Dropdown.IsOpen or Dropdown._openGen ~= openGen then
+                            return
+                        end
+                        if Dropdown._suppressClose then
+                            return
+                        end
                         if Items["OptionHolder"]:IsMouseOverFrame() then
                             return
                         end
-
+                        if Items["RealDropdown"]:IsMouseOverFrame() then
+                            return
+                        end
                         Dropdown:SetOpen(false)
-                    end
+                    end)
                 end
             end)
 
