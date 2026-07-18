@@ -3440,8 +3440,7 @@ do
             local ViewportCamera = Instance.new("Camera")
 
             Items["Viewport"].Instance.CurrentCamera = ViewportCamera
-            ViewportCamera.CameraType = Enum.CameraType.Scriptable
-            ViewportCamera.FieldOfView = 35
+            ViewportCamera.CameraType = Enum.CameraType.Track
             ViewportCamera.Focus = CFrame.new(0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1)
             ViewportCamera.CFrame = CFrame.new(0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1)
 
@@ -3449,10 +3448,9 @@ do
             local RenderObjects = table.create(25)
             local Connections = {}
 
-            -- Front framing: character fills most of the viewport (matches builder box)
-            local OFFSET = CFrame.new(0, 1.2, -5.5)
+            local OFFSET = CFrame.new(0, 2.5, -8.5)
             local PreviewSyncAccum = 0
-            local PREVIEW_SYNC_HZ = 1 / 10
+            local PREVIEW_SYNC_HZ = 1 / 8
 
             local ValidClasses = {
                 MeshPart = true,
@@ -3584,11 +3582,6 @@ do
                 local Root = PreviewModel:FindFirstChild("HumanoidRootPart")
                 if not Root then
                     return
-                end
-
-                local vpSize = Items["Viewport"].Instance.AbsoluteSize
-                if vpSize.X > 1 and vpSize.Y > 1 then
-                    ViewportCamera.ViewportSize = vpSize
                 end
 
                 ViewportCamera.CFrame = CFrame.new(Root.CFrame:ToWorldSpace(OFFSET).Position, Root.Position)
